@@ -1,0 +1,338 @@
+import requests
+import json 
+
+api_key="[COPY_YOUR_API_HERE]"
+api_url="https://places.googleapis.com/v1/places:searchNearby"
+
+def api_call(lat,long):
+  
+  headers= {
+      "Content-Type": "application/json",
+      "X-Goog-FieldMask": "places.displayName,places.id,places.location,places.rating,places.userRatingCount,places.delivery",
+      "X-Goog-Api-Key": api_key
+  }
+  
+  content = {
+    "includedTypes": ["restaurant"],
+    "maxResultCount": 20,
+    "rankPreference": "DISTANCE",
+    "locationRestriction": {
+      "circle": {
+        "center": {
+          "latitude": lat,
+          "longitude": long},
+        "radius": 250.0
+      }
+    }
+  }
+  print("Trying to connect to the Google API......")
+  try:
+      response = requests.post(api_url, headers=headers, json=content)
+      response.raise_for_status()
+      print("API response received successfully.")
+      return response.json()
+  except requests.exceptions.HTTPError as e:
+    status_code = e.response.status_code
+    if status_code == 429:
+        print("Error 429: Query limit exceeded. Consider backing off or using exponential retry.")
+        return None
+    elif status_code == 403:
+        print("Error 403: Forbidden. Your API key may be invalid or not authorized.")
+        raise
+    elif status_code == 400:
+        print("Error 400: Bad request. Check your request formatting.")
+        raise
+    else:
+        print(f"HTTP error occurred: {e}")
+        raise
+  except requests.exceptions.Timeout:
+    print("Request timed out. Consider retrying or increasing timeout duration.")
+    return None
+  except requests.exceptions.ConnectionError:
+    print("Connection error. Check your internet or proxy settings.")
+    return None
+  except requests.exceptions.RequestException as e:
+    print(f"An error occurred: {e}")
+    raise
+
+
+def mock_api_call():
+    return {
+      "places": [
+          {
+              "id": "ChIJjbM7m-CBhYARG_Ru8QMv0do",
+              "location": {
+                  "latitude": 37.793832099999996,
+                  "longitude": -122.3966844
+              },
+              "rating": 3.9,
+              "userRatingCount": 43,
+              "displayName": {
+                  "text": "Starbucks",
+                  "languageCode": "usa"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJvaOxW2GAhYARoQ1qUuSDm98",
+              "location": {
+                  "latitude": 37.7938006,
+                  "longitude": -122.39678669999999
+              },
+              "rating": 4.2,
+              "userRatingCount": 442,
+              "displayName": {
+                  "text": "Cafe Terminus",
+                  "languageCode": "en"
+              },
+              "delivery": False
+          },
+          {
+              "id": "ChIJ-XIpW2GAhYARSAi87-NegX0",
+              "location": {
+                  "latitude": 37.793987800000004,
+                  "longitude": -122.39665000000001
+              },
+              "rating": 4.3,
+              "userRatingCount": 1258,
+              "displayName": {
+                  "text": "Ozzy's Grill & Cafe",
+                  "languageCode": "en"
+              },
+              "delivery": False
+          },
+          {
+              "id": "ChIJl59CXGGAhYARSsN259OrOtw",
+              "location": {
+                  "latitude": 37.7938458,
+                  "longitude": -122.3969018
+              },
+              "rating": 4.4,
+              "userRatingCount": 94,
+              "displayName": {
+                  "text": "Le Regency Deli & Cafe",
+                  "languageCode": "en"
+              },
+              "delivery": False
+          },
+          {
+              "id": "ChIJgetcRmGAhYARjDkShaWuWMs",
+              "location": {
+                  "latitude": 37.7943929,
+                  "longitude": -122.3967467
+              },
+              "rating": 4.5,
+              "userRatingCount": 683,
+              "displayName": {
+                  "text": "Oasis Grill",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJTxkVMF6AhYAR1wDuam4Si2k",
+              "location": {
+                  "latitude": 37.7943851,
+                  "longitude": -122.39607669999998
+              },
+              "rating": 4,
+              "userRatingCount": 369,
+              "displayName": {
+                  "text": "Eclipse Kitchen & Bar",
+                  "languageCode": "en"
+              },
+              "delivery": False
+          },
+          {
+              "id": "ChIJkztvQGGAhYARS9PBosvWB5o",
+              "location": {
+                  "latitude": 37.794337,
+                  "longitude": -122.397021
+              },
+              "rating": 4.2,
+              "userRatingCount": 55,
+              "displayName": {
+                  "text": "Focaccia Reserve",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJAQCQaWGAhYARnGWVypsM8A0",
+              "location": {
+                  "latitude": 37.7938439,
+                  "longitude": -122.3974854
+              },
+              "rating": 3.8,
+              "userRatingCount": 79,
+              "displayName": {
+                  "text": "JOE & THE JUICE",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJJyzbXiOHhYARMNO65wGQRN4",
+              "location": {
+                  "latitude": 37.7932479,
+                  "longitude": -122.3974067
+              },
+              "rating": 3,
+              "userRatingCount": 2,
+              "displayName": {
+                  "text": "Ladle & Leaf",
+                  "languageCode": "en"
+              },
+              "delivery": False
+          },
+          {
+              "id": "ChIJ37NlP2GAhYAR8NldY5Nbi94",
+              "location": {
+                  "latitude": 37.794473499999995,
+                  "longitude": -122.3969591
+              },
+              "rating": 4.4,
+              "userRatingCount": 304,
+              "displayName": {
+                  "text": "Orale Orale",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJLXQNRWKAhYAR173vNYuCe0s",
+              "location": {
+                  "latitude": 37.7942596,
+                  "longitude": -122.3974244
+              },
+              "rating": 3.7,
+              "userRatingCount": 536,
+              "displayName": {
+                  "text": "Chipotle Mexican Grill",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJJe-3lI2BhYARLw_7e2PL-7k",
+              "location": {
+                  "latitude": 37.794610999999996,
+                  "longitude": -122.3960335
+              },
+              "rating": 4.9,
+              "userRatingCount": 36,
+              "displayName": {
+                  "text": "Basil the Bold - Pre-Order for Same Day Pick Up",
+                  "languageCode": "en"
+              },
+              "delivery": False
+          },
+          {
+              "id": "ChIJZ1SMEQeBhYAR8Y0suKMr48o",
+              "location": {
+                  "latitude": 37.794714899999995,
+                  "longitude": -122.3961673
+              },
+              "rating": 4.4,
+              "userRatingCount": 1675,
+              "displayName": {
+                  "text": "Harborview Restaurant & Bar",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJIU0sbmGAhYARhQ8DeuuQsUA",
+              "location": {
+                  "latitude": 37.7937236,
+                  "longitude": -122.39786339999998
+              },
+              "rating": 3.9,
+              "userRatingCount": 61,
+              "displayName": {
+                  "text": "MIXT Salads",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJ2V8wYQCBhYARyMIQ33dVrBA",
+              "location": {
+                  "latitude": 37.7935715,
+                  "longitude": -122.3950588
+              },
+              "rating": 4.3,
+              "userRatingCount": 4,
+              "displayName": {
+                  "text": "The Radiant Table",
+                  "languageCode": "en"
+              }
+          },
+          {
+              "id": "ChIJwbCRsmaAhYARVz021hxqGLk",
+              "location": {
+                  "latitude": 37.7946762,
+                  "longitude": -122.39570599999999
+              },
+              "rating": 4.1,
+              "userRatingCount": 96,
+              "displayName": {
+                  "text": "Sushi Kinta",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJNXkJeJOBhYAR9KP_LW1Rrvo",
+              "location": {
+                  "latitude": 37.7937127,
+                  "longitude": -122.39796059999998
+              },
+              "displayName": {
+                  "text": "Matt McGonegle Diner",
+                  "languageCode": "en"
+              }
+          },
+          {
+              "id": "ChIJOcUlG2SAhYARsXj5YpdHKRM",
+              "location": {
+                  "latitude": 37.7934766,
+                  "longitude": -122.39499459999999
+              },
+              "rating": 4.5,
+              "userRatingCount": 42,
+              "displayName": {
+                  "text": "Proper Food",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          },
+          {
+              "id": "ChIJlaliaLqBhYAR_uCLP7LsWGU",
+              "location": {
+                  "latitude": 37.794483799999995,
+                  "longitude": -122.39521010000001
+              },
+              "displayName": {
+                  "text": "iKU Sushi",
+                  "languageCode": "en"
+              }
+          },
+          {
+              "id": "ChIJ421bSGGAhYARogZJrPFCrOU",
+              "location": {
+                  "latitude": 37.794813,
+                  "longitude": -122.39565379999999
+              },
+              "rating": 4.2,
+              "userRatingCount": 2147,
+              "displayName": {
+                  "text": "Osha Thai Restaurant and Bar (Embarcadero)",
+                  "languageCode": "en"
+              },
+              "delivery": True
+          }
+      ]
+    }
+
+

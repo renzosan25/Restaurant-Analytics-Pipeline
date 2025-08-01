@@ -1,0 +1,9 @@
+# .gitignore
+.venv/
+__pycache__/
+*.pyc
+*.log
+kepler_results/
+dbt/logs/
+.env
+postgres/data/

@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: dev
+    database: db
+    tables:
+      - name: raw_restaurants_data
+        columns:
+          - name: id
+          - name: id_location
+          - name: latitude
+          - name: longitude
+          - name: rating
+          - name: userRatingCount
+          - name: place_name
+          - name: hasDelivery
+          - name: hex_id
+          - name: hex_consult
+          - name: inserted_at
+      
+      - name: raw_hex_data
+        columns:
+          - name: hex_id
+          - name: latitude
+          - name: longitude
+          - name: inserted_at
