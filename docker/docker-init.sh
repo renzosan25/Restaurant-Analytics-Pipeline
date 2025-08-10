@@ -66,6 +66,22 @@ echo_step "3" "Starting" "Setting up roles and perms"
 superset init
 echo_step "3" "Complete" "Setting up roles and perms"
 
+
+# Importar dashboards automáticamente si existe el export
+DASH_EXPORT="/app/docker/assets/dashboards_export.zip"
+if [ -f "$DASH_EXPORT" ]; then
+    echo_step "3" "Starting" "Importing dashboards from $DASH_EXPORT"
+    # Importa dashboards/charts/datasets (no credenciales de DB)
+    if superset import-dashboards -p "$DASH_EXPORT" --username admin; then
+        echo_step "3" "Complete" "Dashboards imported"
+    else
+        echo "WARN: import-dashboards falló (posibles conflictos o formato). Continúo sin detener init."
+    fi
+else
+    echo "No dashboards export found at $DASH_EXPORT. Skipping import."
+fi
+
+
 if [ "$SUPERSET_LOAD_EXAMPLES" = "yes" ]; then
     # Load some data to play with
     echo_step "4" "Starting" "Loading examples"
