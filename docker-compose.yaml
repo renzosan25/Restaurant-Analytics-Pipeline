@@ -30,8 +30,18 @@ services:
     
     networks: 
       - my-network
-
   
+  bootstrap:
+    build:
+      context: .
+      dockerfile: dockerfile.bootstrap
+    depends_on:
+      db:
+        condition: service_started
+    networks:
+      - my-network
+    restart: "no"
+
   af:
     container_name: airflow_container
     build:

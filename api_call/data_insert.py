@@ -2,8 +2,8 @@ import json
 import os
 import h3 # H3 es una libreria de código abierto de Uber para generar cuadriculas hexagonales
 import folium #Una libreria de datos geoespaciales para visualizar datos
-from api_request import api_call, mock_api_call
-from generate_data import generate_mock_places
+from api_call.api_request import api_call, mock_api_call
+from api_call.generate_data import generate_mock_places
 import psycopg2
 
 #HEXAGONAL GRID
@@ -70,20 +70,25 @@ def api_request_preview(hex_ids, output_path="map_preview.html"):
 
 #POSTGRES CONNECTION
 
-def connect_to_db():
+def connect_to_db(retries=5, delays=5):
     print("Connecting to PostgresSQL database")
-    try:
-        conn=psycopg2.connect(
-            host="db",
-            port=5432,
-            dbname="db",
-            user="db_user",
-            password="db_password"
-        )
-        return conn
-    except psycopg2.Error as e:
-        print(f"Database connection failed: {e}")
-        raise
+    for attempt in range(1, retries +1):
+        try:
+            conn=psycopg2.connect(
+                host="db",
+                port=5432,
+                dbname="db",
+                user="db_user",
+                password="db_password"
+            )
+            return conn
+        except psycopg2.Error as e:
+            print(f"Attempt {attempt} failed: {e}")
+            if attempt < retries:
+                time.sleep(delay)
+            else:
+                print(f"Database connection failed, all attempts failed: {e}")
+                raise
 
 def create_table(conn):
     print("Creating table if not exists...")
@@ -101,7 +106,6 @@ def create_table(conn):
             place_name TEXT,
             hasDelivery BOOL,
             hex_id TEXT,
-            hex_consult TEXT,
             inserted_at TIMESTAMP DEFAULT NOW()
             );
             """)
@@ -121,8 +125,7 @@ def create_table_hex(conn):
             CREATE TABLE IF NOT EXISTS dev.raw_hex_data(
             id SERIAL PRIMARY KEY,
             hex_id TEXT,
-            latitude FLOAT,
-            longitude FLOAT,
+            hex_contour TEXT,
             inserted_at TIMESTAMP DEFAULT NOW()
             );
             """)
@@ -134,12 +137,17 @@ def create_table_hex(conn):
 
 
 
-def insert_data(conn, data, hid_call):
+def insert_data(conn, data):
     try:
         print("Insert restaurant data into database...")
-        cursor=conn.cursor()
         data_list=[]
-        for items in data["places"]:
+
+        places = data.get("places") if isinstance(data, dict) else None
+        if not places:
+            print("No 'places' in response or empty list. Skipping.")
+            return 0
+
+        for items in places:
             place_id = items.get("id")
             latitude = items.get("location",{}).get("latitude")
             longitude = items.get("location",{}).get("longitude")
@@ -159,13 +167,19 @@ def insert_data(conn, data, hid_call):
                         userRatingCount,
                         place_name,
                         delivery,
-                        hex_id,
-                        hid_call))
+                        hex_id
+                        ))
 
+
+        if not data_list:
+            print("No valid rows remaining...")
+            return 0
+
+        cursor=conn.cursor()
 
         #Una función muy poderosa para poder insertar data rapidamente a la base de datos
         if data_list:
-            args_str = b','.join((cursor.mogrify("(%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())",row )
+            args_str = b','.join((cursor.mogrify("(%s,%s,%s,%s,%s,%s,%s,%s,NOW())",row )
             for row in data_list))
         
         query= b"""
@@ -178,7 +192,6 @@ def insert_data(conn, data, hid_call):
         place_name,
         hasdelivery,
         hex_id,
-        hex_consult,
         inserted_at
         )
         VALUES """ + args_str
@@ -196,31 +209,42 @@ def insert_data_hex(conn, data):
         print("Insert hex data into database...")
         cursor=conn.cursor()
         data_list=[]
-        for items in data["places"]:
+        
+        places = data.get("places") if isinstance(data, dict) else None
+        if not places:
+            print("No 'places' in response or empty list. Skipping.")
+            return 0
+
+        for items in places:
             place_latitude = items.get("location",{}).get("latitude")
             place_longitude = items.get("location",{}).get("longitude")
             hex_id = h3.latlng_to_cell(place_latitude, place_longitude, 9)
-            hex_centroid = h3.cell_to_latlng(hex_id)
-            hex_lat = hex_centroid[0]
-            hex_long = hex_centroid[1]
+            hex_coords=h3.cell_to_boundary(hex_id)
+            hex_polygon = [[lon, lat] for lat, lon in hex_coords]
+            hex_polygon_str = json.dumps(hex_polygon)
+            
             if None in [place_latitude,place_longitude]:
                 continue
+            
             data_list.append((
                         hex_id,
-                        hex_lat,
-                        hex_long
+                        hex_polygon_str
                        ))
 
         #Una función muy poderosa para poder insertar data rapidamente a la base de datos
+        
+        if not data_list:
+            print("No valid rows remaining...")
+            return 0
+        
         if data_list:
-            args_str = b','.join((cursor.mogrify("(%s,%s,%s,NOW())",row )
+            args_str = b','.join((cursor.mogrify("(%s,%s,NOW())",row )
             for row in data_list))
         
         query= b"""
         INSERT INTO dev.raw_hex_data(
         hex_id,
-        latitude,
-        longitude,
+        hex_contour,
         inserted_at
         )
         VALUES """ + args_str
@@ -231,6 +255,20 @@ def insert_data_hex(conn, data):
         print(f"Error inserting data into database...")
         raise
 
+def create_table_init():
+    try:
+        conn=connect_to_db()
+        create_table(conn)
+        create_table_hex(conn)
+    except psycopg2.Error as e:
+        print(f"Error creating tables....")
+        raise
+    finally:
+        if 'conn' in locals():
+            conn.close()
+            print("Database connection closed.")
+
+
 
 def main():
     try:
@@ -240,9 +278,9 @@ def main():
         hex_ids=generate_hex_ids()
         for hid in hex_ids:
             centro=h3.cell_to_latlng(hid)
-            #data=test_api_call()
-            data=generate_mock_places(centro[0],centro[1])
-            insert_data(conn, data, hid)
+            data=mock_api_call()
+            #data=api_call(centro[0],centro[1])
+            insert_data(conn, data)
             insert_data_hex(conn, data)
     except Exception as e:
         print(f"An error ocurred during execution: {e}")
@@ -251,4 +289,3 @@ def main():
             conn.close()
             print("Database connection closed.")
         
-

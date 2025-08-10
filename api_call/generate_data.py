@@ -18,7 +18,7 @@ def generate_mock_places(lat, long, min_places=5, max_places=20):
                     "latitude": round(center_lat + delta_lat, 8),
                     "longitude": round(center_lng + delta_lng, 8)
                 },
-                "rating": round(random.uniform(3.0, 5.0), 1),
+                "rating": round(random.uniform(2.0, 5.0), 1),
                 "userRatingCount": random.randint(0, 500),
                 "displayName": {
                     "text": faker.company(),  # o faker.first_name() + ' ' + faker.word()

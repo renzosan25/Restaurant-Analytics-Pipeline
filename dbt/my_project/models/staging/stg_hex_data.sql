@@ -1,7 +1,7 @@
 {{
     config(
         materialized='table',
-        unique_key='id'
+        unique_key='hex_id'
     )
 }}
 
@@ -20,8 +20,7 @@ delete_duplicates as (
 SELECT
     id,
     hex_id,
-    latitude,
-    longitude,
+    hex_contour,
     inserted_at
 
 FROM delete_duplicates

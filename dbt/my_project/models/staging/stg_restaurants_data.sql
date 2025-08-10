@@ -10,14 +10,11 @@ with source as(
     FROM {{ source( 'dev', 'raw_restaurants_data') }}
 ),
 
-
-
 delete_duplicates as (
 
-    SELECT *, ROW_NUMBER() OVER (PARTITION BY id_location order by inserted_at) as rep
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY id_location order by inserted_at DESC, id DESC) as rep
     FROM source
 )
-
 
 SELECT
     id,
@@ -27,10 +24,9 @@ SELECT
     rating,
     userRatingCount,
     place_name,
-    hasDelivery,
+    COALESCE(hasDelivery::int, 0) as hasDelivery,
     hex_id,
-    hex_consult,
     inserted_at
-
 FROM delete_duplicates
-WHERE rep=1
+WHERE rep = 1
+

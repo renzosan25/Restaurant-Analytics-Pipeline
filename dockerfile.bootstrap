@@ -1,0 +1,10 @@
+FROM python:3.12.3
+
+WORKDIR /app
+
+COPY api_call/ ./api_call/
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["python", "-c", "from api_call.data_insert import create_table_init; create_table_init()"]

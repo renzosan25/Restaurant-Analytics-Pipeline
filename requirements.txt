@@ -2,3 +2,5 @@ h3
 folium
 requests
 Faker
+psycopg2-binary
+requests

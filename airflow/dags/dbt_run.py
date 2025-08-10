@@ -1,24 +1,12 @@
 import sys
 from airflow import DAG
 from datetime import datetime, timedelta
-from airflow.operators.python import PythonOperator
 from airflow.providers.docker.operators.docker import DockerOperator
-from docker.types import Mount
 
-sys.path.append('/opt/airflow/api_call')
-
-def safe_main_callable():
-    from data_insert import main
-    return main()
-
-
-def export_callable():
-    from csv_data_load import csv_export
-    return csv_export()
 
 default_args= {
-    'description' : 'A DAG to orchestrate data',
-    'start_date' : datetime(2025,7,10),
+    'description' : 'A DAG to run dbt and test models',
+    'start_date' : datetime(2025,8,4),
     'catchup' : False,
     'retries' : 2,
     'retry_delay' : timedelta(minutes=3)
@@ -26,18 +14,14 @@ default_args= {
 
 
 dag = DAG(
-    dag_id='map-restaurants-orchestrator',
+    dag_id='map-dbt-run',
     default_args=default_args,
     schedule=None
 )
 
 
 with dag:
-    ingestor = PythonOperator(
-        task_id = 'data_ingestor',
-        python_callable=safe_main_callable
-    )
-    dbt_transformation = DockerOperator(
+    task1 = DockerOperator(
         task_id = 'run_dbt_transformation',
         image = "renzosanchez/dbt-project:latest",
         api_version = 'auto',
@@ -51,10 +35,3 @@ with dag:
         mount_tmp_dir=False,
         command = None,
     )
-    # task3 = PythonOperator(
-    #     task_id = 'export_csv',
-    #     python_callable= export_callable
-    # )
-
-ingestor>>dbt_transformation
-

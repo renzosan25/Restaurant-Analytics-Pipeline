@@ -15,12 +15,10 @@ sources:
           - name: place_name
           - name: hasDelivery
           - name: hex_id
-          - name: hex_consult
           - name: inserted_at
       
       - name: raw_hex_data
         columns:
           - name: hex_id
-          - name: latitude
-          - name: longitude
+          - name: hex_contour
           - name: inserted_at
