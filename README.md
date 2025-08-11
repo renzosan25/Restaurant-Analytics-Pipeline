@@ -114,10 +114,10 @@ docker compose down -v
 ```
 * Removes containers and named volumes. If you mounted a local folder (e.g., ./postgres/data), delete that folder manually to fully reset the DB
 ## Reference
-Google Places API: https://developers.google.com/maps/documentation/places/web-service/overview
+* Google Places API: https://developers.google.com/maps/documentation/places/web-service/overview
 dbt: https://docs.getdbt.com
-Apache Superset: https://superset.apache.org
-H3: https://h3geo.org
+* Apache Superset: https://superset.apache.org
+* H3: https://h3geo.org
 ## Additional Views
 
 **Zone Analysis Overview**  
