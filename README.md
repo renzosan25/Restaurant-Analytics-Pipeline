@@ -48,8 +48,8 @@ Additionally, a hexagon contour table stores the geospatial boundaries for visua
 ![1](./screenshots/Workflow_diagram.png)
 
 **Steps:**
-1. **Data Extraction & Loading (Python)** – Calls Google Places API, converts coordinates into H3 hexagons, and inserts raw data into PostgreSQL.
-2. **Raw Data Storage (PostgreSQL)** – Stores raw restaurant data and hexagon boundaries.
+1. **Data Extraction (Python)** – Calls Google Places API, converts coordinates into H3 hexagons.
+2. **Data Loading (PostgreSQL)** – Inserts raw restaurant data and hexagon boundaries into the database.
 3. **Data Transformation (dbt)** – Cleans duplicates, applies Bayesian averaging for ratings, calculates KPIs (density, delivery share, popularity), and computes a competitiveness score.
 4. **Visualization (Superset)** – Interactive dashboard to explore competitiveness by zone.
 5. **Orchestration (Airflow)** – Manages extraction and transformation DAGs.
@@ -83,7 +83,7 @@ Superset:
 ```bash
 cp docker/.env_example docker/.env
 ```
-```Set SUPERSET_SECRET_KEY, MAPBOX_API_KEY, and DB vars if needed.```
+Set SUPERSET_SECRET_KEY, MAPBOX_API_KEY, and DB vars if needed.
 
 3. Set your Google Places API key in api_call/api_request.py (or adapt the code to read it from an env var). Do not commit real keys.
 
@@ -91,7 +91,7 @@ cp docker/.env_example docker/.env
 
 5. Build the dbt image used by the Airflow DockerOperator:
 ```bash
-docker build -t [Your_User]/dbt-project:latest ./dbt
+docker build -t renzosanchez/dbt-project:latest ./dbt
 ```
 6. Start the stack:
 ```bash
@@ -113,7 +113,7 @@ Optionally, trigger map-dbt-run to re-run only dbt when testing models.
 docker compose down -v
 ```
 * Removes containers and named volumes. If you mounted a local folder (e.g., ./postgres/data), delete that folder manually to fully reset the DB
-## Reference:
+## Reference
 Google Places API: https://developers.google.com/maps/documentation/places/web-service/overview
 dbt: https://docs.getdbt.com
 Apache Superset: https://superset.apache.org
