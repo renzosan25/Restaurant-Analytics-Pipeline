@@ -122,9 +122,11 @@ dbt: https://docs.getdbt.com
 
 **Zone Analysis Overview**  
 Detailed breakdown of a selected zone showing competitiveness index, top ranked restaurants, delivery coverage, zone profile radar chart, and restaurant density.  
+
 ![Zone Analysis](./screenshots/zone_analysis.png)
 
 **Delivery & Profile Insights**  
 Focused view of delivery penetration and profile metrics (ratings, reviews, density) for a specific zone.  
+
 ![Delivery and Profile Insights](./screenshots/delivery_profile_insights.png)
 
