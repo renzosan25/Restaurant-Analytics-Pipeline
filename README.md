@@ -1,3 +1,4 @@
+
 # Restaurant Analytics Pipeline
 
 ## Table of Contents
@@ -82,7 +83,8 @@ Superset:
 ```bash
 cp docker/.env_example docker/.env
 ```
-Set SUPERSET_SECRET_KEY, MAPBOX_API_KEY, and DB vars if needed.
+```Set SUPERSET_SECRET_KEY, MAPBOX_API_KEY, and DB vars if needed.```
+
 3. Set your Google Places API key in api_call/api_request.py (or adapt the code to read it from an env var). Do not commit real keys.
 4. Define your area of interest (polygon) by editing the coordinates in api_call/data_insert.py → generate_hex_ids(). The pipeline will generate H3 hexagons from that polygon.
 5. Build the dbt image used by the Airflow DockerOperator:
@@ -105,7 +107,7 @@ Resetting the environment:
 ```bash
 docker compose down -v
 ```
-Removes containers and named volumes. If you mounted a local folder (e.g., ./postgres/data), delete that folder manually to fully reset the DB.
+```Removes containers and named volumes. If you mounted a local folder (e.g., ./postgres/data), delete that folder manually to fully reset the DB.```
 ## Reference:
 Google Places API: https://developers.google.com/maps/documentation/places/web-service/overview
 dbt: https://docs.getdbt.com
@@ -120,4 +122,5 @@ Detailed breakdown of a selected zone showing competitiveness index, top ranked 
 **Delivery & Profile Insights**  
 Focused view of delivery penetration and profile metrics (ratings, reviews, density) for a specific zone.  
 ![Delivery and Profile Insights](./screenshots/delivery_profile_insights.png)
+
 
